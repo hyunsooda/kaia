@@ -598,6 +598,14 @@ func (args *EthTransactionArgs) setGasPrice(gasPrice *hexutil.Big) {
 	args.GasPrice = gasPrice
 }
 
+func (args *EthTransactionArgs) GetAccessList() types.AccessList {
+	if args.AccessList != nil {
+		return *args.AccessList
+	} else {
+		return nil
+	}
+}
+
 // setDefaults fills in default values for unspecified tx fields.
 func (args *EthTransactionArgs) setDefaults(ctx context.Context, b Backend) error {
 	if args.GasPrice != nil && (args.MaxFeePerGas != nil || args.MaxPriorityFeePerGas != nil) {

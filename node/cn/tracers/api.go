@@ -856,7 +856,7 @@ func (api *CommonAPI) TraceCall(ctx context.Context, args kaiaapi.CallArgs, bloc
 	}
 
 	// Execute the trace
-	intrinsicGas, err := types.IntrinsicGas(args.InputData(), nil, args.To == nil, api.backend.ChainConfig().Rules(block.Number()))
+	intrinsicGas, err := types.IntrinsicGas(args.InputData(), args.GetAccessList(), args.To == nil, api.backend.ChainConfig().Rules(block.Number()))
 	if err != nil {
 		return nil, err
 	}
