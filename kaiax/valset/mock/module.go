@@ -8,8 +8,11 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	state "github.com/kaiachain/kaia/blockchain/state"
 	types "github.com/kaiachain/kaia/blockchain/types"
+	vm "github.com/kaiachain/kaia/blockchain/vm"
 	common "github.com/kaiachain/kaia/common"
+	valset "github.com/kaiachain/kaia/kaiax/valset"
 	rpc "github.com/kaiachain/kaia/networks/rpc"
 )
 
@@ -50,18 +53,19 @@ func (mr *MockValsetModuleMockRecorder) APIs() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "APIs", reflect.TypeOf((*MockValsetModule)(nil).APIs))
 }
 
-// EpochTransition mocks base method.
-func (m *MockValsetModule) EpochTransition(arg0 uint64) error {
+// GetCandidates mocks base method.
+func (m *MockValsetModule) GetCandidates(arg0 uint64) ([]common.Address, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EpochTransition", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "GetCandidates", arg0)
+	ret0, _ := ret[0].([]common.Address)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// EpochTransition indicates an expected call of EpochTransition.
-func (mr *MockValsetModuleMockRecorder) EpochTransition(arg0 interface{}) *gomock.Call {
+// GetCandidates indicates an expected call of GetCandidates.
+func (mr *MockValsetModuleMockRecorder) GetCandidates(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EpochTransition", reflect.TypeOf((*MockValsetModule)(nil).EpochTransition), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCandidates", reflect.TypeOf((*MockValsetModule)(nil).GetCandidates), arg0)
 }
 
 // GetCommittee mocks base method.
@@ -109,6 +113,21 @@ func (mr *MockValsetModuleMockRecorder) GetDemotedValidators(arg0 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDemotedValidators", reflect.TypeOf((*MockValsetModule)(nil).GetDemotedValidators), arg0)
 }
 
+// GetEpochTransition mocks base method.
+func (m *MockValsetModule) GetEpochTransition(arg0 valset.ValidatorStateMap, arg1 uint64, arg2 *state.StateDB) (valset.ValidatorStateMap, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEpochTransition", arg0, arg1, arg2)
+	ret0, _ := ret[0].(valset.ValidatorStateMap)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEpochTransition indicates an expected call of GetEpochTransition.
+func (mr *MockValsetModuleMockRecorder) GetEpochTransition(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEpochTransition", reflect.TypeOf((*MockValsetModule)(nil).GetEpochTransition), arg0, arg1, arg2)
+}
+
 // GetProposer mocks base method.
 func (m *MockValsetModule) GetProposer(arg0, arg1 uint64) (common.Address, error) {
 	m.ctrl.T.Helper()
@@ -124,6 +143,35 @@ func (mr *MockValsetModuleMockRecorder) GetProposer(arg0, arg1 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProposer", reflect.TypeOf((*MockValsetModule)(nil).GetProposer), arg0, arg1)
 }
 
+// GetTimeoutTransition mocks base method.
+func (m *MockValsetModule) GetTimeoutTransition(arg0 valset.ValidatorStateMap) valset.ValidatorStateMap {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTimeoutTransition", arg0)
+	ret0, _ := ret[0].(valset.ValidatorStateMap)
+	return ret0
+}
+
+// GetTimeoutTransition indicates an expected call of GetTimeoutTransition.
+func (mr *MockValsetModuleMockRecorder) GetTimeoutTransition(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTimeoutTransition", reflect.TypeOf((*MockValsetModule)(nil).GetTimeoutTransition), arg0)
+}
+
+// GetVrankViolationTransition mocks base method.
+func (m *MockValsetModule) GetVrankViolationTransition(arg0 valset.ValidatorStateMap, arg1 uint64, arg2 *state.StateDB) (valset.ValidatorStateMap, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetVrankViolationTransition", arg0, arg1, arg2)
+	ret0, _ := ret[0].(valset.ValidatorStateMap)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetVrankViolationTransition indicates an expected call of GetVrankViolationTransition.
+func (mr *MockValsetModuleMockRecorder) GetVrankViolationTransition(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVrankViolationTransition", reflect.TypeOf((*MockValsetModule)(nil).GetVrankViolationTransition), arg0, arg1, arg2)
+}
+
 // PostInsertBlock mocks base method.
 func (m *MockValsetModule) PostInsertBlock(arg0 *types.Block) error {
 	m.ctrl.T.Helper()
@@ -136,6 +184,20 @@ func (m *MockValsetModule) PostInsertBlock(arg0 *types.Block) error {
 func (mr *MockValsetModuleMockRecorder) PostInsertBlock(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostInsertBlock", reflect.TypeOf((*MockValsetModule)(nil).PostInsertBlock), arg0)
+}
+
+// ProcessTransition mocks base method.
+func (m *MockValsetModule) ProcessTransition(arg0 *vm.EVM, arg1 *types.Header, arg2 *state.StateDB) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProcessTransition", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ProcessTransition indicates an expected call of ProcessTransition.
+func (mr *MockValsetModuleMockRecorder) ProcessTransition(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessTransition", reflect.TypeOf((*MockValsetModule)(nil).ProcessTransition), arg0, arg1, arg2)
 }
 
 // RewindDelete mocks base method.
