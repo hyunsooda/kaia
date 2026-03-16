@@ -18,7 +18,9 @@ package impl
 
 import (
 	"crypto/ecdsa"
+	"sync"
 
+	"github.com/kaiachain/kaia/blockchain/types"
 	"github.com/kaiachain/kaia/common"
 	"github.com/kaiachain/kaia/consensus/istanbul"
 	"github.com/kaiachain/kaia/crypto"
@@ -30,10 +32,8 @@ import (
 )
 
 const (
-	candidatePrepareDeadlineMs = 200
-
-	VRankPreprepareMsg = 0x17
-	VRankCandidateMsg  = 0x18
+	candidateMsgTimeoutMs   = 500
+	vrankCandidateSigDomain = "VRANK_CANDIDATE_V1"
 
 	broadcastChSize    = 2048
 	vrankEpoch         = 86400
@@ -51,32 +51,39 @@ type InitOpts struct {
 	Valset      valset.ValsetModule
 	NodeKey     *ecdsa.PrivateKey
 	ChainConfig *params.ChainConfig
+	Chain       chain
+}
+
+type chain interface {
+	CurrentHeader() *types.Header
+	GetHeaderByNumber(number uint64) *types.Header
 }
 
 type VRankModule struct {
 	InitOpts
 
-	broadcastCh   chan *vrank.BroadcastRequest
+	broadcastCh   chan *vrank.VRankBroadcastEvent
 	broadcastFeed event.Feed
 	stopCh        chan struct{}
 
 	nodeID common.Address
 
 	// only for validators
-	prepreparedView istanbul.View // for collection window management
-	collector       *vrank.Collector
+	prepreparedView   istanbul.View // for collection window management
+	prepreparedViewMu sync.RWMutex
+	collector         *vrank.Collector
 }
 
 func NewVRankModule() *VRankModule {
 	return &VRankModule{
-		broadcastCh: make(chan *vrank.BroadcastRequest, broadcastChSize),
+		broadcastCh: make(chan *vrank.VRankBroadcastEvent, broadcastChSize),
 		stopCh:      make(chan struct{}),
 		collector:   vrank.NewCollector(),
 	}
 }
 
 func (v *VRankModule) Init(opts *InitOpts) error {
-	if opts == nil || opts.Valset == nil || opts.NodeKey == nil || opts.ChainConfig == nil {
+	if opts == nil || opts.Valset == nil || opts.NodeKey == nil || opts.ChainConfig == nil || opts.ChainConfig.ChainID == nil || opts.Chain == nil {
 		return vrank.ErrInitUnexpectedNil
 	}
 	v.InitOpts = *opts
@@ -94,4 +101,9 @@ func (v *VRankModule) Start() error {
 func (v *VRankModule) Stop() {
 	logger.Info("VRankModule stopped")
 	close(v.stopCh)
+	close(v.broadcastCh)
+}
+
+func (v *VRankModule) SubscribeVRank(sink chan<- *vrank.VRankBroadcastEvent) event.Subscription {
+	return v.broadcastFeed.Subscribe(sink)
 }
